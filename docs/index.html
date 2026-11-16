@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacidad · Presión MTB</title>
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      margin: 0;
+      background: #0E1110;
+      color: #F4F7F2;
+      font: 18px/1.55 Georgia, "Iowan Old Style", serif;
+    }
+    main { max-width: 40rem; margin: 0 auto; padding: 3rem 1.25rem 4rem; }
+    h1 { font-family: "Trebuchet MS", sans-serif; font-size: 2.2rem; letter-spacing: -0.03em; margin-bottom: 0.25rem; }
+    h2 { font-family: "Trebuchet MS", sans-serif; font-size: 1.15rem; margin-top: 2rem; }
+    p, li { color: #D5DDD4; }
+    a { color: #C6F54A; }
+    .mark { color: #C6F54A; font-family: "Trebuchet MS", sans-serif; font-weight: 700; letter-spacing: 0.08em; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="mark">PRESIÓN MTB</p>
+    <h1>Política de privacidad</h1>
+    <p>Última actualización: 16 de noviembre de 2026.</p>
+    <p>Presión MTB calcula una presión de partida para cubiertas de mountain bike. La app no tiene cuenta ni servidor propio.</p>
+
+    <h2>Datos que se quedan en el teléfono</h2>
+    <ul>
+      <li>Perfil: nombre opcional, peso, estatura, edad, temperatura habitual del garaje y unidad preferida (psi o bar).</li>
+      <li>Bicicletas: nombre, medida de rueda, peso y el montaje de cada rueda.</li>
+      <li>Historial: lugar, temperatura, presiones recomendadas y usadas, y la fecha.</li>
+    </ul>
+    <p>Esos datos viven en el dispositivo. Puedes exportarlos a un archivo JSON e importarlos en otro teléfono. Borrar una bici o una salida la oculta y deja una marca de tiempo para poder sincronizar más adelante. Hoy esa marca no se envía a ningún servidor.</p>
+    <p>El peso entra en el cálculo. La estatura y la edad solo se guardan en el perfil.</p>
+
+    <h2>Ubicación y clima</h2>
+    <p>Si tocas «Usar mi ubicación», la app pide permiso de ubicación mientras está en uso. No hay seguimiento en segundo plano.</p>
+    <p>Con esa posición, el geocodificador del sistema devuelve el nombre del lugar, y la latitud y la longitud se envían a <a href="https://open-meteo.com">Open-Meteo</a> para obtener la temperatura actual. Open-Meteo no exige una clave.</p>
+    <p>Si guardas la salida, el lugar, la temperatura y, si existían, las coordenadas quedan en el historial del teléfono. Puedes escribir la temperatura y el lugar a mano. La calculadora funciona sin ubicación y sin conexión.</p>
+    <p>No hay publicidad, no hay seguimiento entre apps y no vendemos datos.</p>
+
+    <h2>Copias del sistema</h2>
+    <p>Android e iOS pueden incluir los datos de la app en la copia de seguridad del teléfono, protegida por la cuenta del sistema.</p>
+
+    <h2>Edad</h2>
+    <p>La app no está dirigida a menores de 13 años. La edad del perfil es opcional, la escribes tú y no sale del teléfono.</p>
+
+    <h2>Contacto</h2>
+    <p>Para una consulta de privacidad, abre un issue en <a href="https://github.com/kzeta/mtb-calc/issues">github.com/kzeta/mtb-calc</a>.</p>
+  </main>
+</body>
+</html>

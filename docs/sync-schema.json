@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/kzeta/mtb-calc/docs/sync-schema.json",
+  "title": "PresionMTBSync",
+  "description": "Documento versión 1 para exportar, importar y, más adelante, sincronizar. La última escritura gana comparando updatedAt. deletedAt es una baja lógica.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "exportedAt", "profile", "bikes", "logs"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "exportedAt": { "type": "string", "format": "date-time" },
+    "profile": { "$ref": "#/$defs/profile" },
+    "bikes": { "type": "array", "items": { "$ref": "#/$defs/bike" } },
+    "logs": { "type": "array", "items": { "$ref": "#/$defs/log" } }
+  },
+  "$defs": {
+    "uuid": { "type": "string", "minLength": 1 },
+    "instant": { "type": "string", "format": "date-time" },
+    "wheel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["widthIn", "rimInternalMm", "system", "casing", "maxPsi"],
+      "properties": {
+        "widthIn": { "type": "number", "exclusiveMinimum": 0 },
+        "rimInternalMm": { "type": "number", "exclusiveMinimum": 0 },
+        "system": { "enum": ["tube", "tubeless", "insert"] },
+        "casing": { "enum": ["xc", "trail", "enduro", "dh"] },
+        "maxPsi": { "type": ["number", "null"] }
+      }
+    },
+    "profile": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["id", "name", "weightKg", "heightCm", "age", "garageTempC", "unit", "createdAt", "updatedAt", "deletedAt"],
+      "properties": {
+        "id": { "$ref": "#/$defs/uuid" },
+        "name": { "type": "string" },
+        "weightKg": { "type": "number" },
+        "heightCm": { "type": "number" },
+        "age": { "type": "integer" },
+        "garageTempC": { "type": "number" },
+        "unit": { "enum": ["psi", "bar"] },
+        "createdAt": { "$ref": "#/$defs/instant" },
+        "updatedAt": { "$ref": "#/$defs/instant" },
+        "deletedAt": { "type": ["string", "null"], "format": "date-time" }
+      }
+    },
+    "bike": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "wheelSize", "weightKg", "front", "rear", "createdAt", "updatedAt", "deletedAt"],
+      "properties": {
+        "id": { "$ref": "#/$defs/uuid" },
+        "name": { "type": "string" },
+        "wheelSize": { "enum": ["26", "27.5", "29", "mullet"] },
+        "weightKg": { "type": "number" },
+        "front": { "$ref": "#/$defs/wheel" },
+        "rear": { "$ref": "#/$defs/wheel" },
+        "createdAt": { "$ref": "#/$defs/instant" },
+        "updatedAt": { "$ref": "#/$defs/instant" },
+        "deletedAt": { "type": ["string", "null"], "format": "date-time" }
+      }
+    },
+    "log": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "bikeId", "bikeName", "placeName", "latitude", "longitude",
+        "temperatureC", "garageTempC", "riderWeightKg", "bikeWeightKg",
+        "discipline", "terrain", "frontRecommendedPsi", "rearRecommendedPsi",
+        "frontUsedPsi", "rearUsedPsi", "createdAt", "updatedAt", "deletedAt"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/uuid" },
+        "bikeId": { "type": ["string", "null"] },
+        "bikeName": { "type": "string" },
+        "placeName": { "type": "string" },
+        "latitude": { "type": ["number", "null"] },
+        "longitude": { "type": ["number", "null"] },
+        "temperatureC": { "type": "number" },
+        "garageTempC": { "type": "number" },
+        "riderWeightKg": { "type": "number" },
+        "bikeWeightKg": { "type": "number" },
+        "discipline": { "enum": ["xc", "marathon", "trail", "enduro", "dh"] },
+        "terrain": { "enum": ["soft", "mixed", "dry", "rock"] },
+        "frontRecommendedPsi": { "type": "number" },
+        "rearRecommendedPsi": { "type": "number" },
+        "frontUsedPsi": { "type": "number" },
+        "rearUsedPsi": { "type": "number" },
+        "createdAt": { "$ref": "#/$defs/instant" },
+        "updatedAt": { "$ref": "#/$defs/instant" },
+        "deletedAt": { "type": ["string", "null"], "format": "date-time" }
+      }
+    }
+  }
+}

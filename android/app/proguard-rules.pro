@@ -1,0 +1,2 @@
+-keep class com.kzeta.presionmtb.domain.** { *; }
+-keepattributes *Annotation*,InnerClasses,Signature,EnclosingMethod

@@ -1,0 +1,184 @@
+// Oracle for shared/fixtures/pressure-cases.json.
+// Kotlin and Swift ports must match these results within 0.0001 psi.
+
+import { writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const ATM_PSI = 14.696;
+const PSI_PER_BAR = 14.503773773;
+const REF_RIDER = 75;
+const REF_BIKE = 12;
+const FRONT_SHARE = 0.42;
+const REAR_SHARE = 0.58;
+const REF_FRONT_PSI = 21.5;
+const REF_REAR_PSI = 24;
+const REF_WIDTH = 2.4;
+
+const refTotal = REF_RIDER + REF_BIKE;
+
+function rimAdjust(mm) {
+  const delta = 30 - mm;
+  return delta > 0 ? delta * 0.15 : delta * 0.08;
+}
+
+function setupAdjust(system) {
+  if (system === "tube") return 4;
+  if (system === "insert") return -2.5;
+  return 0;
+}
+
+function disciplineAdjust(discipline) {
+  return { xc: 2, marathon: 1.5, trail: 0, enduro: -1.5, dh: -1 }[discipline];
+}
+
+function casingAdjust(casing) {
+  return { xc: 1.5, trail: 0, enduro: -1, dh: -1.5 }[casing];
+}
+
+function terrainAdjust(terrain) {
+  return { soft: -1.5, mixed: 0, dry: 0.5, rock: 1.5 }[terrain];
+}
+
+function limits(system) {
+  return system === "tube" ? [18, 45] : [14, 40];
+}
+
+function recommend(input) {
+  const share = input.position === "front" ? FRONT_SHARE : REAR_SHARE;
+  const refPsi = input.position === "front" ? REF_FRONT_PSI : REF_REAR_PSI;
+  const total = input.riderWeightKg + input.bikeWeightKg;
+  const base = refPsi * ((total * share) / (refTotal * share));
+  const widthFactor = (REF_WIDTH / input.widthIn) ** 1.4;
+  let psi =
+    base * widthFactor +
+    rimAdjust(input.rimInternalMm) +
+    setupAdjust(input.system) +
+    disciplineAdjust(input.discipline) +
+    casingAdjust(input.casing) +
+    terrainAdjust(input.terrain);
+  const [floor, ceiling] = limits(input.system);
+  let raisedToMinimum = false;
+  let limitedByMax = false;
+  if (psi < floor) {
+    psi = floor;
+    raisedToMinimum = true;
+  }
+  if (psi > ceiling) {
+    psi = ceiling;
+    limitedByMax = true;
+  }
+  if (input.maxPsi != null && psi > input.maxPsi) {
+    psi = input.maxPsi;
+    limitedByMax = true;
+    raisedToMinimum = false;
+  }
+  return { psi, raisedToMinimum, limitedByMax };
+}
+
+function garagePsi(trailPsi, trailTempC, garageTempC) {
+  const trailK = trailTempC + 273.15;
+  const garageK = garageTempC + 273.15;
+  return (trailPsi + ATM_PSI) * (garageK / trailK) - ATM_PSI;
+}
+
+function roundPsi(psi) {
+  return Math.floor(psi * 2 + 0.5) / 2;
+}
+
+function roundBar(psi) {
+  return Math.floor((psi / PSI_PER_BAR) * 20 + 0.5) / 20;
+}
+
+const base = {
+  riderWeightKg: 75,
+  bikeWeightKg: 12,
+  widthIn: 2.4,
+  rimInternalMm: 30,
+  system: "tubeless",
+  casing: "trail",
+  discipline: "trail",
+  terrain: "mixed",
+  maxPsi: null,
+};
+
+function make(name, overrides) {
+  const input = { ...base, ...overrides };
+  const result = recommend(input);
+  return { name, ...input, expectedPsi: result.psi, ...result, psi: undefined };
+}
+
+const cases = [
+  make("reference-front", { position: "front" }),
+  make("reference-rear", { position: "rear" }),
+  make("heavier-front", { position: "front", riderWeightKg: 90, bikeWeightKg: 14 }),
+  make("heavier-rear", { position: "rear", riderWeightKg: 90, bikeWeightKg: 14 }),
+  make("wider-front", { position: "front", widthIn: 2.6 }),
+  make("narrower-rear", { position: "rear", widthIn: 2.2 }),
+  make("narrow-rim-front", { position: "front", rimInternalMm: 25 }),
+  make("wide-rim-rear", { position: "rear", rimInternalMm: 35 }),
+  make("tube-rear", { position: "rear", system: "tube" }),
+  make("insert-front", { position: "front", system: "insert" }),
+  make("xc-rock-front", {
+    position: "front",
+    discipline: "xc",
+    casing: "xc",
+    terrain: "rock",
+  }),
+  make("enduro-soft-rear", {
+    position: "rear",
+    discipline: "enduro",
+    casing: "dh",
+    terrain: "soft",
+  }),
+  make("clamp-low-front", {
+    position: "front",
+    riderWeightKg: 45,
+    bikeWeightKg: 10,
+    widthIn: 2.8,
+    system: "insert",
+    casing: "dh",
+    discipline: "enduro",
+    terrain: "soft",
+  }),
+  make("clamp-high-rear", {
+    position: "rear",
+    riderWeightKg: 120,
+    bikeWeightKg: 22,
+    widthIn: 2.1,
+    rimInternalMm: 22,
+    system: "tube",
+    casing: "xc",
+    discipline: "xc",
+    terrain: "rock",
+  }),
+  make("sidewall-rear", { position: "rear", maxPsi: 20 }),
+  make("sidewall-below-floor", { position: "front", system: "tubeless", maxPsi: 10 }),
+];
+
+const garage = [
+  { name: "same-temp", trailPsi: 24, trailTempC: 20, garageTempC: 20 },
+  { name: "cold-trail", trailPsi: 24, trailTempC: 5, garageTempC: 20 },
+  { name: "hot-trail", trailPsi: 22, trailTempC: 32, garageTempC: 10 },
+].map((item) => ({
+  ...item,
+  expectedPsi: garagePsi(item.trailPsi, item.trailTempC, item.garageTempC),
+}));
+
+const rounding = [21.24, 21.25, 21.5, 24].map((psi) => ({
+  psi,
+  displayPsi: roundPsi(psi),
+  displayBar: roundBar(psi),
+}));
+
+const payload = {
+  description: "Generated by shared/fixtures/generate.mjs. Do not edit by hand.",
+  cases: cases.map(({ psi, ...rest }) => rest),
+  garage,
+  rounding,
+};
+
+const json = JSON.stringify(payload, null, 2) + "\n";
+const out = join(dirname(fileURLToPath(import.meta.url)), "pressure-cases.json");
+writeFileSync(out, json, "utf8");
+process.stdout.write(out + "\n");
