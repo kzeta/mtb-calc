@@ -4,7 +4,7 @@ Requisitos en este equipo: el Android SDK ya está en `%LOCALAPPDATA%\Android\Sd
 
 Identificador: `com.kzeta.presionmtb`. No se puede cambiar después de crear la ficha.
 
-Versión de esta entrega: `versionName` 1.0.0, `versionCode` 1. `targetSdk` 35. `minSdk` 26.
+Versión de esta entrega: `versionName` 1.0.0, `versionCode` 2. `targetSdk` 36. `minSdk` 26. Play ya recibió el código 1, así que el siguiente AAB tiene que usar un código mayor.
 
 ## Compilar
 
